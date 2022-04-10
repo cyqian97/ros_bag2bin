@@ -37,21 +37,30 @@
 ## to the 'chatter' topic
 
 import rospy
+import numpy as np
 import sensor_msgs.point_cloud2 as pc2
 from sensor_msgs.msg import PointCloud2
-from ros_numpy.point_cloud2 import pointcloud2_to_xyz_array
+from ros_numpy.point_cloud2 import pointcloud2_to_xyz_array, pointcloud2_to_array
 
 def callback(data):
-    coord = pointcloud2_to_xyz_array(data)
-    print(coord.__len__())
-    print(coord[0])
-    # rospy.loginfo(rospy.get_caller_id() + 'I heard %s', coord)
+    global file_count
+    coord = pointcloud2_to_array(data)
+    coord_np = np.array([list(c) for c in coord],dtype=np.float32)
+    coord_np = coord_np[:,[7,8,9,4]]
+    print(coord_np.shape)
+    filename = str(file_count).rjust(8,"0")+".bin"
+    fid = open(filename,mode='wb')
+    coord_np.tofile(fid)
+    fid.close()
+    file_count = file_count+1
+    
+    # coord = pointcloud2_to_xyz_array(data)
+    
     # points = pc2.read_points(data.data, skip_nans=True)
     # for point in points[:10]:
     #         pt_x = point[0]
     #         pt_y = point[1]
     #         pt_z = point[2]
-    # print(data)
 
 def listener():
 
@@ -62,6 +71,8 @@ def listener():
     # run simultaneously.
     rospy.init_node('listener', anonymous=True)
 
+    global file_count 
+    file_count = 0
     rospy.Subscriber('/cepton/points', PointCloud2, callback)
 
     # spin() simply keeps python from exiting until this node is stopped
