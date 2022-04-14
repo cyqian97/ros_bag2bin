@@ -46,7 +46,8 @@ def callback(data):
     global file_count
     coord = pointcloud2_to_array(data)
     coord_np = np.array([list(c) for c in coord],dtype=np.float32)
-    coord_np = coord_np[:,[7,8,9,4]]
+    # coord_np = coord_np[:,[7,8,9,4]]
+    print(coord_np[0,:])
     print(coord_np.shape)
     filename = str(file_count).rjust(8,"0")+".bin"
     fid = open(filename,mode='wb')
@@ -73,7 +74,7 @@ def listener():
 
     global file_count 
     file_count = 0
-    rospy.Subscriber('/cepton/points', PointCloud2, callback)
+    rospy.Subscriber('/nonground', PointCloud2, callback)
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
